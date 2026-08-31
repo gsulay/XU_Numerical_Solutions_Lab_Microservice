@@ -6,7 +6,8 @@ def get_spiral_standards(alignment_id: str) -> dict:
     to generate highway geometry parameters and ROW limits.
     """
 
-    SAFE_ID = "SAYRE_HWY_1111"
+    MIN_SAFE_ID = "SAYRE_HWY_1111"
+    MAX_SAFE_ID = "SAYRE_HWY_9999"
 
     # Just ensure they didn't send a completely blank string
     cleaned_id = alignment_id.strip()
@@ -32,11 +33,17 @@ def get_spiral_standards(alignment_id: str) -> dict:
     max_row = max(max_row, 1.5)
 
     #Safe ID for checking
-    if alignment_id == SAFE_ID:
-            max_row = round(estimated_y * 1.5, 2)
-                
-            # Enforce a minimum practical limit
-            max_row = max(max_row, 1.5)
+    if alignment_id == MIN_SAFE_ID:
+        max_row = round(estimated_y * 0.5, 2)
+            
+        # Enforce a minimum practical limit
+        max_row = max(max_row, 1.5)
+    elif alignment_id == MAX_SAFE_ID:
+        max_row = round(estimated_y * 1.5, 2)
+                    
+        # Enforce a minimum practical limit
+        max_row = max(max_row, 1.5)
+         
     
     return {
         "R_c": R_c,
