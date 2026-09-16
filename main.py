@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from activities.highway_alignment import get_spiral_standards
+from activities import cramers_rule_truss, jacobi_water_network, gauss_seidel_traffic
 
 app = FastAPI(
     title="Numerical Solutions Laboratory Activities API", 
@@ -36,6 +37,34 @@ def read_alignment_standards(alignment_id: str):
         # Catch unexpected mathematical or processing errors
         raise HTTPException(status_code=500, detail="Internal server processing error.")
 
+@app.get("/api/v1/la2/cramers")
+def get_cramers_rule_params(id: str = Query(..., description="The Student's unique ID")):
+    """
+    Returns the A_matrix and b_vector for the Cramer's Rule Determinate Truss lab.
+    """
+    # Fetch parameters from the activity module
+    params = cramers_rule_truss.generate_params(id)
+    return params
+
+@app.get("/api/v1/la2/water_network")
+def get_water_network_params(id: str = Query(..., description="The Student's unique ID")):
+    """
+    Returns the shuffled A_matrix and b_vector for the Jacobi Iteration lab.
+    The student must perform row-swapping to achieve diagonal dominance.
+    """
+    # Fetch parameters from the activity module
+    params = jacobi_water_network.generate_params(id)
+    return params
+
+@app.get("/api/v1/la2/traffic_network")
+def get_traffic_network_params(id: str = Query(..., description="The Student's unique ID")):
+    """
+    Returns the A_matrix and b_vector for the Gauss-Seidel Traffic Flow lab.
+    Ensures the matrix is strictly diagonally dominant.
+    """
+    # Fetch parameters from the activity module
+    params = gauss_seidel_traffic.generate_params(id)
+    return params
 # Example placeholder for future lab modules:
 # @app.post("/api/v1/structures/truss_analysis")
 # def analyze_truss(data: dict): ...
