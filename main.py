@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from activities.highway_alignment import get_spiral_standards
-from activities import cramers_rule_truss, jacobi_water_network, gauss_seidel_traffic
+from activities import cramers_rule_truss, jacobi_water_network, gauss_seidel_traffic, curve_fitting
 
 app = FastAPI(
     title="Numerical Solutions Laboratory Activities API", 
@@ -65,6 +65,21 @@ def get_traffic_network_params(id: str = Query(..., description="The Student's u
     # Fetch parameters from the activity module
     params = gauss_seidel_traffic.generate_params(id)
     return params
+@app.get("/api/v1/curvefit/datasets/{group_id}")
+def get_curve_fitting_datasets(group_id: str):
+    """
+    Returns the per-group datasets for Lab 04 (Curve Fitting), one bridge project:
+    river gaugings (rating curve, design flood level), a Proctor test of the borrow soil
+    (compaction curve, zero-air-voids screening) and batching-plant cylinder records
+    (multiple regression trained with gradient descent).
+    """
+    try:
+        return curve_fitting.generate_params(group_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server processing error.")
+
 # Example placeholder for future lab modules:
 # @app.post("/api/v1/structures/truss_analysis")
 # def analyze_truss(data: dict): ...
