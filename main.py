@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from activities.highway_alignment import get_spiral_standards
 from activities import cramers_rule_truss, jacobi_water_network, gauss_seidel_traffic
+from activities import greenshields_traffic, beam_polynomial, concrete_regression
 
 app = FastAPI(
     title="Numerical Solutions Laboratory Activities API", 
@@ -65,6 +66,43 @@ def get_traffic_network_params(id: str = Query(..., description="The Student's u
     # Fetch parameters from the activity module
     params = gauss_seidel_traffic.generate_params(id)
     return params
+
+@app.get("/api/v1/la4/traffic_flow")
+def get_traffic_flow_params(id: str = Query(..., description="The Student's unique ID")):
+    """
+    Returns speed-density readings and a query density for the LA4 linear regression scenario.
+    """
+    try:
+        return greenshields_traffic.generate_params(id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server processing error.")
+
+@app.get("/api/v1/la4/beam_moment")
+def get_beam_moment_params(id: str = Query(..., description="The Student's unique ID")):
+    """
+    Returns beam gauge readings and a prediction point for the LA4 polynomial regression scenario.
+    """
+    try:
+        return beam_polynomial.generate_params(id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server processing error.")
+
+@app.get("/api/v1/la4/concrete_capacity")
+def get_concrete_capacity_params(id: str = Query(..., description="The Student's unique ID")):
+    """
+    Returns column test data and a new column for the LA4 gradient descent scenario.
+    """
+    try:
+        return concrete_regression.generate_params(id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server processing error.")
+
 # Example placeholder for future lab modules:
 # @app.post("/api/v1/structures/truss_analysis")
 # def analyze_truss(data: dict): ...
