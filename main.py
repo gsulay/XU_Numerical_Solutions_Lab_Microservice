@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from activities.highway_alignment import get_spiral_standards
 from activities import cramers_rule_truss, jacobi_water_network, gauss_seidel_traffic
 from activities import greenshields_traffic, beam_polynomial, concrete_regression
+from activities import ie15_leontief, ie15_fertilizer_blend, ie15_warehouse_network
 
 app = FastAPI(
     title="Numerical Solutions Laboratory Activities API", 
@@ -98,6 +99,47 @@ def get_concrete_capacity_params(id: str = Query(..., description="The Student's
     """
     try:
         return concrete_regression.generate_params(id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server processing error.")
+
+# ---------------------------------------------------------------------
+# IE 15 - Advanced Mathematics for Industrial Engineers
+# ---------------------------------------------------------------------
+@app.get("/api/v1/ie15/la5/leontief")
+def get_ie15_leontief_params(id: str = Query(..., description="The Student's unique ID")):
+    """
+    Returns a 3-department technical-coefficient matrix and two final-demand vectors
+    for the IE 15 LA5 Gauss-Jacobi (input-output) scenario.
+    """
+    try:
+        return ie15_leontief.generate_params(id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server processing error.")
+
+@app.get("/api/v1/ie15/la5/fertilizer_blend")
+def get_ie15_fertilizer_blend_params(id: str = Query(..., description="The Student's unique ID")):
+    """
+    Returns the nutrient composition matrix and nutrient targets for the IE 15 LA5
+    Gauss-Seidel blending scenario. The equations are not in a diagonally dominant order.
+    """
+    try:
+        return ie15_fertilizer_blend.generate_params(id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server processing error.")
+
+@app.get("/api/v1/ie15/la5/warehouse_network")
+def get_ie15_warehouse_network_params(id: str = Query(..., description="The Student's unique ID")):
+    """
+    Returns a 4x4 warehouse balance system for the IE 15 LA5 method-selection scenario.
+    """
+    try:
+        return ie15_warehouse_network.generate_params(id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
